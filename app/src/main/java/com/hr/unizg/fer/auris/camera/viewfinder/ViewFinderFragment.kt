@@ -1,11 +1,13 @@
 package com.hr.unizg.fer.auris.camera.viewfinder
 
 import android.os.Bundle
+import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -15,6 +17,7 @@ import com.hr.unizg.fer.auris.R
 import com.hr.unizg.fer.auris.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_viewfinder.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.Executor
 
 class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFinderContract.View {
 
@@ -49,11 +52,24 @@ class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFin
     private fun startCamera() {
         imagePreview = Preview.Builder().apply {
             setTargetAspectRatio(AspectRatio.RATIO_16_9)
+            setTargetResolution(Size(1080, 1920))
             setTargetRotation(previewView.display.rotation)
         }.build()
         imagePreview.setSurfaceProvider(previewView.previewSurfaceProvider)
 
-        val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setTargetResolution(Size(720, 1280))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        imageAnalysis.setAnalyzer(Executor {
+
+        }, ImageAnalysis.Analyzer {
+
+        })
+        val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
         cameraProviderFuture.addListener(Runnable {
             val cameraProvider = cameraProviderFuture.get()
             cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, imagePreview)
