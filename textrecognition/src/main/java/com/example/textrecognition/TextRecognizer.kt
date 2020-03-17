@@ -1,4 +1,4 @@
-package com.hr.unizg.fer.auris.camera.analysis
+package com.example.textrecognition
 
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -8,16 +8,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import org.koin.core.KoinComponent
-import org.koin.core.inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-class TextRecognizer(private val textAnalyzer: TextAnalyzer) : KoinComponent {
-
-    private val textDetector: FirebaseVisionTextRecognizer by inject()
+class TextRecognizer(private val textAnalyzer: TextAnalyzer, private val textDetector: FirebaseVisionTextRecognizer) : KoinComponent {
 
     suspend fun startTextRecognition(onSuccessListener: OnSuccessListener<FirebaseVisionText>, onFailureListener: OnFailureListener) {
-        //TODO: Replace this with adequate coruotine scope
         textAnalyzer.getImageChannelFlow().collect {
             textDetector
                 .processImage(it)

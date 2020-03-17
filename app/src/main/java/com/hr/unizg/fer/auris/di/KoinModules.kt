@@ -2,9 +2,11 @@ package com.hr.unizg.fer.auris.di
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.viewModelScope
+import com.example.textrecognition.TextAnalyzer
+import com.example.textrecognition.TextRecognizer
 import com.google.firebase.ml.vision.FirebaseVision
 import com.hr.unizg.fer.auris.MainActivity
-import com.hr.unizg.fer.auris.camera.analysis.TextRecognizer
 import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderContract
 import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderViewModel
 import com.hr.unizg.fer.auris.navigation.FragmentRouterImpl
@@ -22,7 +24,7 @@ val dataModule = module {
 }
 
 val fragmentModule = module {
-    single { (fragmentManager: FragmentManager) -> FragmentRouterImpl(fragmentManager) }
+    factory { (fragmentManager: FragmentManager) -> FragmentRouterImpl(fragmentManager) }
 }
 
 @ExperimentalCoroutinesApi
@@ -32,9 +34,12 @@ val activityModule = module {
         scoped { (activity: AppCompatActivity) -> PermissionHandler(activity) }
         viewModel { PermissionViewModel(get()) as PermissionContract.ViewModel }
     }
-
-    viewModel { ViewFinderViewModel(get()) as ViewFinderContract.ViewModel }
-    single { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
     factory { FirebaseVision.getInstance().onDeviceTextRecognizer }
-    factory { TextRecognizer(get()) }
+    viewModel { ViewFinderViewModel() as ViewFinderContract.ViewModel }
+    scope<ViewFinderViewModel> {
+        factory { (viewModel: ViewFinderViewModel) -> TextAnalyzer(viewModel.viewModelScope) }
+        factory { TextRecognizer(get(), get()) }
+    }
+
+    single { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
 }

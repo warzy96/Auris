@@ -52,7 +52,6 @@ class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFin
     private fun startCamera() {
         imagePreview = Preview.Builder().apply {
             setTargetAspectRatio(AspectRatio.RATIO_16_9)
-            setTargetResolution(Size(1080, 1920))
             setTargetRotation(previewView.display.rotation)
         }.build()
         imagePreview.setSurfaceProvider(previewView.previewSurfaceProvider)
@@ -62,11 +61,7 @@ class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFin
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
 
-        imageAnalysis.setAnalyzer(Executor {
-
-        }, ImageAnalysis.Analyzer {
-
-        })
+        imageAnalysis.setAnalyzer(Executor {}, viewModel.provideImageAnalyzer())
         val cameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
