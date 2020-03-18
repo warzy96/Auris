@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "72124224918",
+    "firebase_url": "https://auris-1963a.firebaseio.com",
+    "project_id": "auris-1963a",
+    "storage_bucket": "auris-1963a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72124224918:android:3e2462df23f881b23939b7",
+        "android_client_info": {
+          "package_name": "com.hr.unizg.fer.auris"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "72124224918-0panhrusfecs09h86g2pu8tstmdb7hgl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtm1SJvBR3pdJkGEGnMvT_zMwS_A_CP3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72124224918-0panhrusfecs09h86g2pu8tstmdb7hgl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,6 +3,7 @@ package com.hr.unizg.fer.auris
 import android.app.Application
 import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraXConfig
+import com.google.firebase.FirebaseApp
 import com.hr.unizg.fer.auris.di.activityModule
 import com.hr.unizg.fer.auris.di.dataModule
 import com.hr.unizg.fer.auris.di.fragmentModule
@@ -20,6 +21,7 @@ class AurisApp : Application(), CameraXConfig.Provider {
     @ExperimentalCoroutinesApi
     override fun onCreate() {
         super.onCreate()
+        FirebaseApp.initializeApp(this)
         startKoin {
             androidContext(this@AurisApp)
             modules(

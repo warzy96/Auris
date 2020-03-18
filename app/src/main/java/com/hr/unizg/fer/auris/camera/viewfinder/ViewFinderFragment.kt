@@ -17,7 +17,7 @@ import com.hr.unizg.fer.auris.R
 import com.hr.unizg.fer.auris.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_viewfinder.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFinderContract.View {
 
@@ -46,7 +46,10 @@ class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFin
             cameraProviderFuture = ProcessCameraProvider.getInstance(it)
         }
 
-        previewView.post { startCamera() }
+        previewView.post {
+            startCamera()
+            viewModel.startTextRecognition()
+        }
     }
 
     private fun startCamera() {
@@ -57,17 +60,18 @@ class ViewFinderFragment : BaseFragment<ViewFinderContract.ViewModel>(), ViewFin
         imagePreview.setSurfaceProvider(previewView.previewSurfaceProvider)
 
         val imageAnalysis = ImageAnalysis.Builder()
-            .setTargetResolution(Size(720, 1280))
+            .setTargetResolution(Size(480, 360))
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
 
-        imageAnalysis.setAnalyzer(Executor {}, viewModel.provideImageAnalyzer())
+        imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), viewModel.provideImageAnalyzer())
+
         val cameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
         cameraProviderFuture.addListener(Runnable {
             val cameraProvider = cameraProviderFuture.get()
-            cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, imagePreview)
+            cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, imageAnalysis, imagePreview)
         }, ContextCompat.getMainExecutor(context))
     }
 

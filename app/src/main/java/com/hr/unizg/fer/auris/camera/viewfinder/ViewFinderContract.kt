@@ -11,5 +11,7 @@ interface ViewFinderContract {
 
     abstract class ViewModel : BaseViewModel<View>() {
         abstract fun provideImageAnalyzer(): ImageAnalysis.Analyzer
+
+        abstract fun startTextRecognition()
     }
 }

@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.viewModelScope
 import com.example.textrecognition.TextAnalyzer
 import com.example.textrecognition.TextRecognizer
-import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
 import com.hr.unizg.fer.auris.MainActivity
 import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderContract
 import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderViewModel
@@ -33,13 +33,12 @@ val activityModule = module {
     scope<MainActivity> {
         scoped { (activity: AppCompatActivity) -> PermissionHandler(activity) }
         viewModel { PermissionViewModel(get()) as PermissionContract.ViewModel }
+        scoped { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
     }
-    factory { FirebaseVision.getInstance().onDeviceTextRecognizer }
     viewModel { ViewFinderViewModel() as ViewFinderContract.ViewModel }
     scope<ViewFinderViewModel> {
         factory { (viewModel: ViewFinderViewModel) -> TextAnalyzer(viewModel.viewModelScope) }
-        factory { TextRecognizer(get(), get()) }
+        factory { (textAnalyzer: TextAnalyzer, textDetector: FirebaseVisionTextRecognizer) -> TextRecognizer(textAnalyzer, textDetector) }
     }
 
-    single { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
 }
