@@ -1,14 +1,12 @@
 package com.hr.unizg.fer.auris.camera.viewfinder
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -21,6 +19,12 @@ import com.hr.unizg.fer.auris.utils.observe
 import kotlinx.android.synthetic.main.fragment_viewfinder.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
+
+private const val RATIO_4_3_VALUE = 4.0 / 3.0
+private const val RATIO_16_9_VALUE = 16.0 / 9.0
 
 class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
 
@@ -36,6 +40,7 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var camera: Camera
     private lateinit var imagePreview: Preview
+    private var screenAspectRatio: Int = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_viewfinder, container, false)
@@ -47,40 +52,39 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
         context?.let {
             cameraProviderFuture = ProcessCameraProvider.getInstance(it)
         }
+    }
 
-        setPreviewViewSize()
+    override fun onResume() {
+        super.onResume()
 
         previewView.post {
             startCamera()
             viewModel.startTextRecognition()
         }
-    }
 
-    private fun setPreviewViewSize() {
-        //TODO: Change this to some dynamic calculation in runtime
-        previewView.layoutParams.height = 1440
-    }
-
-    override fun onResume() {
-        super.onResume()
         observe(viewModel.getViewFinderModelLiveData(), ::render)
         observe(viewModel.getTextAnalysisDimensionLiveData(), ::onTextAnalysisDimensionChanged)
     }
 
-    private fun onTextAnalysisDimensionChanged(size: Size) {
-        with(size) {
-            val imageWidth = if (isPortraitMode(context)) height else width
-            val imageHeight = if (isPortraitMode(context)) width else height
-            cameraPreviewOverlay.setScale(imageWidth, imageHeight)
-        }
-    }
-
     private fun render(firebaseVisionText: FirebaseVisionText) {
-
         cameraPreviewOverlay.setTextData(firebaseVisionText)
     }
 
+    private fun onTextAnalysisDimensionChanged(size: Size) {
+        with(size) {
+            if (isPortraitMode(context)) {
+                cameraPreviewOverlay.setScale(height, width)
+            } else {
+                cameraPreviewOverlay.setScale(width, height)
+            }
+        }
+    }
+
     private fun startCamera() {
+        setAspectRatio()
+
+        adjustPreviewViewSize()
+
         val imageAnalysis = setUpImageAnalysis()
 
         cameraProviderFuture.addListener(Runnable {
@@ -94,6 +98,32 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
         }, ContextCompat.getMainExecutor(context))
     }
 
+    private fun setAspectRatio() {
+        val metrics = DisplayMetrics().also { previewView.display.getRealMetrics(it) }
+
+        screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
+    }
+
+    private fun adjustPreviewViewSize() {
+        val metrics = DisplayMetrics().also { previewView.display.getRealMetrics(it) }
+
+        val widthCoefficient = if (screenAspectRatio == AspectRatio.RATIO_16_9) 16 else 4
+        val heightCoefficient = if (screenAspectRatio == AspectRatio.RATIO_16_9) 9 else 3
+        if (isPortraitMode(context)) {
+            previewView.layoutParams.height = metrics.widthPixels / heightCoefficient * widthCoefficient
+        } else {
+            previewView.layoutParams.width = metrics.heightPixels / heightCoefficient * widthCoefficient
+        }
+    }
+
+    private fun aspectRatio(width: Int, height: Int): Int {
+        val previewRatio = max(width, height).toDouble() / min(width, height)
+        if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
+            return AspectRatio.RATIO_4_3
+        }
+        return AspectRatio.RATIO_16_9
+    }
+
     private fun setUpImageAnalysis(): ImageAnalysis =
         buildImageAnalysisUseCase().apply {
             setAnalyzer(Executors.newSingleThreadExecutor(), viewModel.provideImageAnalyzer())
@@ -101,6 +131,7 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
 
     private fun buildImageAnalysisUseCase(): ImageAnalysis =
         ImageAnalysis.Builder()
+            .setTargetAspectRatio(screenAspectRatio)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
 
