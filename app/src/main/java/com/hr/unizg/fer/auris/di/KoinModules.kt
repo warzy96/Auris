@@ -7,13 +7,13 @@ import com.example.textrecognition.TextAnalyzer
 import com.example.textrecognition.TextRecognizer
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
 import com.hr.unizg.fer.auris.MainActivity
-import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderContract
 import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderViewModel
+import com.hr.unizg.fer.auris.camera.viewfinder.ViewFinderViewModelImpl
 import com.hr.unizg.fer.auris.navigation.FragmentRouterImpl
 import com.hr.unizg.fer.auris.navigation.Router
-import com.hr.unizg.fer.auris.permissions.PermissionContract
 import com.hr.unizg.fer.auris.permissions.PermissionHandler
 import com.hr.unizg.fer.auris.permissions.PermissionViewModel
+import com.hr.unizg.fer.auris.permissions.PermissionViewModelImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -32,12 +32,12 @@ val fragmentModule = module {
 val activityModule = module {
     scope<MainActivity> {
         scoped { (activity: AppCompatActivity) -> PermissionHandler(activity) }
-        viewModel { PermissionViewModel(get()) as PermissionContract.ViewModel }
+        viewModel { PermissionViewModelImpl(get()) as PermissionViewModel }
         scoped { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
     }
-    viewModel { ViewFinderViewModel() as ViewFinderContract.ViewModel }
-    scope<ViewFinderViewModel> {
-        factory { (viewModel: ViewFinderViewModel) -> TextAnalyzer(viewModel.viewModelScope) }
+    viewModel { ViewFinderViewModelImpl() as ViewFinderViewModel }
+    scope<ViewFinderViewModelImpl> {
+        factory { (viewModel: ViewFinderViewModelImpl) -> TextAnalyzer(viewModel.viewModelScope) }
         factory { (textAnalyzer: TextAnalyzer, textDetector: FirebaseVisionTextRecognizer) -> TextRecognizer(textAnalyzer, textDetector) }
     }
 

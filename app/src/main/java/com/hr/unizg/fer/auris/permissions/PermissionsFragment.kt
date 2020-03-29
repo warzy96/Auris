@@ -9,9 +9,9 @@ import com.hr.unizg.fer.auris.R
 import com.hr.unizg.fer.auris.base.BaseFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class PermissionsFragment : BaseFragment<PermissionContract.ViewModel>(), PermissionContract.View {
+class PermissionsFragment : BaseFragment<PermissionViewModel>() {
 
-    override val viewModel: PermissionContract.ViewModel by viewModel()
+    override val viewModel: PermissionViewModel by viewModel()
 
     companion object {
         const val TAG = "PermissionsFragment"
@@ -26,8 +26,6 @@ class PermissionsFragment : BaseFragment<PermissionContract.ViewModel>(), Permis
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        viewModel.view = this
 
         /*if (viewModel.checkPermissions(REQUIRED_PERMISSIONS)) {
             //TODO: This fragment should be used to show messages why certain permissions are needed and should contain a user entry point for requesting permissions again

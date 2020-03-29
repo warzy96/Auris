@@ -1,6 +1,6 @@
 package com.hr.unizg.fer.auris.base
 
-abstract class BaseViewModel<V : BaseContract.View> : BaseContract.ViewModel() {
+import androidx.lifecycle.ViewModel
 
-    lateinit var view: V
+abstract class BaseViewModel : ViewModel() {
 }

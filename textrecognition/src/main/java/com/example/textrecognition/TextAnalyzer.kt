@@ -18,6 +18,22 @@ class TextAnalyzer(private val coroutineScope: CoroutineScope) : ImageAnalysis.A
 
     private val imageChannel: BroadcastChannel<FirebaseVisionImage> = BroadcastChannel(1)
 
+    /**
+     * Use this listener to scale recognized block of text when drawing them on the UI
+     */
+    private var textAnalysisDimensionListener: TextAnalysisDimensionListener = object : TextAnalysisDimensionListener {
+        override fun onDimensionChanged(width: Int, height: Int) {
+        }
+    }
+
+    fun setTextAnalysisDimensionListener(textAnalysisDimensionListener: TextAnalysisDimensionListener) {
+        this.textAnalysisDimensionListener = textAnalysisDimensionListener
+    }
+
+    private var imageWidth = 0
+
+    private var imageHeight = 0
+
     fun getImageChannelFlow() = imageChannel.asFlow()
 
     private fun degreesToFirebaseRotation(degrees: Int): Int {
@@ -35,6 +51,12 @@ class TextAnalyzer(private val coroutineScope: CoroutineScope) : ImageAnalysis.A
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         imageProxy.image?.let {
+            if (imageWidth != it.width || imageHeight != it.height) {
+                imageWidth = it.width
+                imageHeight = it.height
+                textAnalysisDimensionListener.onDimensionChanged(it.width, it.height)
+            }
+
             val rotationDegrees = imageProxy.imageInfo.rotationDegrees
             val firebaseVisionImage = FirebaseVisionImage.fromMediaImage(it, degreesToFirebaseRotation(rotationDegrees))
             coroutineScope.launch { imageChannel.send(firebaseVisionImage) }
