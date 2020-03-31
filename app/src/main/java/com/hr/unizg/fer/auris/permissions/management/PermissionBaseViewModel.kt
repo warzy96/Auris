@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @ExperimentalCoroutinesApi
 abstract class PermissionBaseViewModel(protected val permissionHandler: PermissionHandler) : BaseViewModel() {
 
-    abstract fun checkPermissionsGranted(permission: Array<String>)
+    abstract fun checkPermissionsGranted(permissions: Array<String>)
 
     abstract fun providePermissionRequestEventFlow(): Flow<PermissionModel>
 }
