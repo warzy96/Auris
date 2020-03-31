@@ -5,8 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.hr.unizg.fer.auris.R
 import com.hr.unizg.fer.auris.base.BaseFragment
+import com.hr.unizg.fer.auris.permissions.management.PERMISSION_CAMERA
+import com.hr.unizg.fer.auris.permissions.management.REQUEST_CODE_PERMISSIONS
+import kotlinx.android.synthetic.main.fragment_permissions.*
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PermissionsFragment : BaseFragment<PermissionViewModel>() {
@@ -27,11 +32,14 @@ class PermissionsFragment : BaseFragment<PermissionViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*if (viewModel.checkPermissions(REQUIRED_PERMISSIONS)) {
-            //TODO: This fragment should be used to show messages why certain permissions are needed and should contain a user entry point for requesting permissions again
-        } else {
-            viewModel.requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }*/
+        requestPermissionsButton.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.requestPermissions(
+                    arrayOf(PERMISSION_CAMERA),
+                    REQUEST_CODE_PERMISSIONS
+                )
+            }
+        }
     }
 
 }

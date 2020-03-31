@@ -2,4 +2,6 @@
 <resources>
     <dimen name="shutter_circle_stroke_width">2dp</dimen>
     <dimen name="shutter_circle_size">64dp</dimen>
+    <dimen name="common_edge_margin">24dp</dimen>
+    <dimen name="permission_icon_size">64dp</dimen>
 </resources>

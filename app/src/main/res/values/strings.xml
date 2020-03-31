@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Auris</string>
+    <string name="fragment_permissions_request_permissions_button_text">Grant access</string>
+    <string name="fragment_permissions_camera_permission_reasoning">Auris needs access to camera to be able to scan the text from camera feed.</string>
 </resources>

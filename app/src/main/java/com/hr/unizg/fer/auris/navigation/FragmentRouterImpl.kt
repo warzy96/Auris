@@ -11,8 +11,10 @@ private const val ACTIONS_FRAGMENT_CONTAINER_ID = R.id.fragment_actions_containe
 class FragmentRouterImpl(private val fragmentManager: FragmentManager) {
 
     fun showViewFinderFragment() {
-        fragmentManager.beginTransaction()
-            .replace(ACTIONS_FRAGMENT_CONTAINER_ID, ViewFinderFragment.newInstance(), ViewFinderFragment.TAG)
-            .commit()
+        if (fragmentManager.fragments.size == 0) {
+            fragmentManager.beginTransaction()
+                .replace(ACTIONS_FRAGMENT_CONTAINER_ID, ViewFinderFragment.newInstance(), ViewFinderFragment.TAG)
+                .commit()
+        }
     }
 }

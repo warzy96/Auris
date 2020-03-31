@@ -9,9 +9,11 @@ import com.hr.unizg.fer.auris.di.dataModule
 import com.hr.unizg.fer.auris.di.fragmentModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
+@InternalCoroutinesApi
 class AurisApp : Application(), CameraXConfig.Provider {
     override fun getCameraXConfig(): CameraXConfig {
         return Camera2Config.defaultConfig()
@@ -27,7 +29,7 @@ class AurisApp : Application(), CameraXConfig.Provider {
             modules(
                 dataModule,
                 fragmentModule,
-                activityModule
+                activityModule(applicationContext)
             )
         }
     }

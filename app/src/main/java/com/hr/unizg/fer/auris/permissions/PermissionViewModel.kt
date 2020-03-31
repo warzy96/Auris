@@ -1,12 +1,10 @@
 package com.hr.unizg.fer.auris.permissions
 
-class PermissionViewModelImpl(private val permissionHandler: PermissionHandler) : PermissionViewModel() {
+import com.hr.unizg.fer.auris.base.BaseViewModel
 
-    fun checkPermissions(permissionList: Array<String>): Boolean {
-        return permissionHandler.allPermissionsGranted(permissionList)
-    }
+abstract class PermissionViewModel : BaseViewModel() {
 
-    fun requestPermissions(permissionList: Array<String>, requestCode: Int) {
-        permissionHandler.requestPermissions(permissionList, requestCode)
-    }
+    abstract fun checkPermissions(requiredPermissions: Array<String>): Boolean
+
+    abstract suspend fun requestPermissions(requiredPermissions: Array<String>, requestCodePermissions: Int)
 }
