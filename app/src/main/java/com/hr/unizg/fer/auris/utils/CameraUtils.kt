@@ -1,6 +1,5 @@
 package com.hr.unizg.fer.auris.utils
 
-import android.view.View
 import androidx.camera.core.AspectRatio
 import kotlin.math.abs
 import kotlin.math.max
@@ -15,14 +14,4 @@ fun aspectRatio(width: Int, height: Int): Int {
         return AspectRatio.RATIO_4_3
     }
     return AspectRatio.RATIO_16_9
-}
-
-fun adjustViewSizeByAspectRatio(viewToResize: View, screenAspectRatio: Int) {
-    val widthCoefficient = if (screenAspectRatio == AspectRatio.RATIO_16_9) 16 else 4
-    val heightCoefficient = if (screenAspectRatio == AspectRatio.RATIO_16_9) 9 else 3
-    if (isPortraitMode(viewToResize.context)) {
-        viewToResize.layoutParams.height = viewToResize.width / heightCoefficient * widthCoefficient
-    } else {
-        viewToResize.layoutParams.width = viewToResize.height / heightCoefficient * widthCoefficient
-    }
 }

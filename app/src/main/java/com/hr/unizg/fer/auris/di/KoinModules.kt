@@ -25,6 +25,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
+const val MAIN_ACTIVITY_SCOPE_ID = "MainActivityScope"
+const val MAIN_ACTIVITY = "MainActivity"
 val dataModule = module {
 
 }
@@ -44,14 +46,12 @@ fun activityModule(applicationContext: Context): Module {
         scope<MainActivity> {
             scoped { (fragmentManager: FragmentManager) -> Router(fragmentManager) }
         }
-
-        viewModel { PermissionViewModelImpl(get()) as PermissionViewModel }
-        viewModel { ViewFinderViewModelImpl() as ViewFinderViewModel }
-        viewModel { ActionsFragmentViewModelImpl() as ActionsFragmentViewModel }
-
         scope<ViewFinderViewModelImpl> {
             factory { (viewModel: ViewFinderViewModelImpl) -> TextAnalyzer(viewModel.viewModelScope) }
             factory { (textAnalyzer: TextAnalyzer, textDetector: FirebaseVisionTextRecognizer) -> TextRecognizer(textAnalyzer, textDetector) }
         }
+        viewModel { PermissionViewModelImpl(get()) as PermissionViewModel }
+        viewModel { ViewFinderViewModelImpl() as ViewFinderViewModel }
+        viewModel { ActionsFragmentViewModelImpl() as ActionsFragmentViewModel }
     }
 }

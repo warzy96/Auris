@@ -38,6 +38,9 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private lateinit var camera: Camera
     private lateinit var imagePreview: Preview
+    private lateinit var cameraSelector: CameraSelector
+    private lateinit var imageAnalysis: ImageAnalysis
+
     private var screenAspectRatio: Int = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -80,17 +83,29 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
     private fun startCamera() {
         setAspectRatio()
 
-        val imageAnalysis = setUpImageAnalysis()
+        imageAnalysis = setUpImageAnalysis()
 
         cameraProviderFuture.addListener(Runnable {
             val cameraProvider = cameraProviderFuture.get()
 
             imagePreview = buildImagePreviewUseCase()
 
-            val cameraSelector = buildCameraSelectorUseCase()
+            setPreviewViewSize()
+
+            cameraSelector = buildCameraSelectorUseCase()
 
             camera = cameraProvider.bindToLifecycle(viewLifecycleOwner, cameraSelector, imageAnalysis, imagePreview)
         }, ContextCompat.getMainExecutor(context))
+    }
+
+    private fun setPreviewViewSize() {
+        previewView.post {
+            val resolution = imagePreview.attachedSurfaceResolution
+            resolution?.let {
+                previewView.layoutParams.height = if (isPortraitMode(context)) it.width else it.height
+                previewView.layoutParams.width = if (isPortraitMode(context)) it.height else it.width
+            }
+        }
     }
 
     private fun setAspectRatio() {
@@ -113,8 +128,9 @@ class ViewFinderFragment : BaseFragment<ViewFinderViewModel>() {
     private fun buildImagePreviewUseCase(): Preview = Preview.Builder()
         .setTargetRotation(previewView.display.rotation)
         .setTargetResolution(Size(previewView.width, previewView.height))
-        .build().apply {
-            setSurfaceProvider(previewView.previewSurfaceProvider)
+        .build()
+        .apply {
+            setSurfaceProvider(previewView.createSurfaceProvider(null))
         }
 
     private fun buildCameraSelectorUseCase() = CameraSelector.Builder()

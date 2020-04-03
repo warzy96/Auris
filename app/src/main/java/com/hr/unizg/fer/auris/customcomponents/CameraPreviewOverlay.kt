@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.graphics.toRectF
 import com.google.firebase.ml.vision.text.FirebaseVisionText
-import kotlin.math.roundToInt
 
 private const val DEFAULT_BORDER_COLOR = Color.WHITE
 private const val DEFAULT_STROKE_WIDTH = 5f
@@ -22,8 +21,8 @@ class CameraPreviewOverlay : View {
     private var borderStrokeWidth: Float = DEFAULT_STROKE_WIDTH
     private val boundingBoxes: ArrayList<Rect> = arrayListOf()
 
-    private var boxScaleX = 1.0f
-    private var boxScaleY = 1.0f
+    private var previewWidth = 1
+    private var previewHeight = 1
 
     constructor(context: Context?) : super(context) {
         init()
@@ -89,15 +88,15 @@ class CameraPreviewOverlay : View {
             }
 
     private fun translateX(value: Int): Int {
-        return (value * boxScaleX).roundToInt()
+        return (value * width / previewWidth)
     }
 
     private fun translateY(value: Int): Int {
-        return (value * boxScaleY).roundToInt()
+        return (value * height / previewHeight)
     }
 
     fun setScale(width: Int, height: Int) {
-        boxScaleX = this.measuredWidth / width.toFloat()
-        boxScaleY = this.measuredHeight / height.toFloat()
+        previewWidth = width
+        previewHeight = height
     }
 }
