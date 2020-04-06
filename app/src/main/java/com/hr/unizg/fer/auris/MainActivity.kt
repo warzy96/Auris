@@ -19,14 +19,12 @@ import org.koin.core.qualifier.named
 @InternalCoroutinesApi
 class MainActivity : BaseActivity() {
 
-    private val router: Router by getKoin()
-        .getOrCreateScope(MAIN_ACTIVITY_SCOPE_ID, named<MainActivity>())
-        .inject { parametersOf(supportFragmentManager) }
-
     private val viewModel: MainActivityViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getKoin()
+            .getOrCreateScope(MAIN_ACTIVITY_SCOPE_ID, named<MainActivity>())
         setContentView(R.layout.activity_main)
 
         subscribeToPermissionRequestEvents()
@@ -34,6 +32,10 @@ class MainActivity : BaseActivity() {
 
     override fun onResumeFragments() {
         super.onResumeFragments()
+        val router: Router by getKoin()
+            .getOrCreateScope(MAIN_ACTIVITY_SCOPE_ID, named<MainActivity>())
+            .inject { parametersOf(supportFragmentManager) }
+
         viewModel.setOnRequestPermissionResultListener {
             if (it) router.showCameraFragments()
             else router.showPermissionsFragment()

@@ -1,6 +1,7 @@
 package com.hr.unizg.fer.auris.camera.preview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,12 @@ import coil.api.load
 import com.hr.unizg.fer.auris.R
 import com.hr.unizg.fer.auris.base.BaseFragment
 import kotlinx.android.synthetic.main.fragment_preview.*
-import org.koin.android.ext.android.inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 class PreviewFragment : BaseFragment<PreviewViewModel>() {
 
     companion object {
@@ -20,7 +25,7 @@ class PreviewFragment : BaseFragment<PreviewViewModel>() {
         }
     }
 
-    override val viewModel: PreviewViewModel by inject()
+    override val viewModel: PreviewViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview, container, false)
@@ -29,8 +34,22 @@ class PreviewFragment : BaseFragment<PreviewViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        photoView.load("https://images.unsplash.com/photo-1577643816920-65b43ba99fba?ixlib=rb-1.2.1&auto=format&fit=crop&w=3300&q=80") {
-            crossfade(true)
+        viewModel.setOnImageCapturedListener {
+            Log.d("asdfg", "$viewModel")
+
+            photoView.load(it) {
+                crossfade(true)
+            }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.subscribeToImageFlow()
+    }
+
+    override fun onDestroy() {
+        viewModel.setOnImageCapturedListener {  }
+        super.onDestroy()
     }
 }

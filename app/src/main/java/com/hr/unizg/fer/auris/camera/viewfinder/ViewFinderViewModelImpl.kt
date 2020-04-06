@@ -1,5 +1,6 @@
 package com.hr.unizg.fer.auris.camera.viewfinder
 
+import android.graphics.Bitmap
 import android.util.Log
 import android.util.Size
 import androidx.camera.core.ImageAnalysis
@@ -14,15 +15,17 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.text.FirebaseVisionText
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.launch
+import com.hr.unizg.fer.auris.camera.capturechannel.CapturedImageChannel
+import kotlinx.coroutines.*
 import org.koin.core.parameter.parametersOf
 import org.koin.ext.getOrCreateScope
 
+@InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @FlowPreview
-class ViewFinderViewModelImpl : ViewFinderViewModel() {
+class ViewFinderViewModelImpl(private val capturedImageChannel: CapturedImageChannel) : ViewFinderViewModel() {
+
+    private lateinit var textRecognitionJob: Job
     private val textAnalyzer: TextAnalyzer by getOrCreateScope().inject { parametersOf(this) }
     private val textDetector: FirebaseVisionTextRecognizer = FirebaseVision.getInstance().onDeviceTextRecognizer
     private val textRecognizer: TextRecognizer by getOrCreateScope().inject { parametersOf(textAnalyzer, textDetector) }
@@ -45,11 +48,18 @@ class ViewFinderViewModelImpl : ViewFinderViewModel() {
     override fun startTextRecognition() {
         setTextAnalysisDimensionListener(textAnalysisDimensionListener)
 
-        viewModelScope.launch {
+        if (::textRecognitionJob.isInitialized && textRecognitionJob.isActive) {
+            return
+        }
+        textRecognitionJob = viewModelScope.launch {
             textRecognizer.startTextRecognition(
                 OnSuccessListener<FirebaseVisionText> { it?.let { recognizedTextLiveData.postValue(it) } },
                 OnFailureListener { exception -> Log.d("asdfg", "$exception") })
         }
+    }
+
+    override fun postImage(imageBitmap: Bitmap?) {
+        viewModelScope.launch { capturedImageChannel.sendImage(imageBitmap) }
     }
 
     private fun setTextAnalysisDimensionListener(textAnalysisDimensionListener: TextAnalysisDimensionListener) {

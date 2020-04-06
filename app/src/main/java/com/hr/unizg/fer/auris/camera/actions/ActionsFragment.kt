@@ -5,16 +5,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.hr.unizg.fer.auris.R
+import com.hr.unizg.fer.auris.camera.capturechannel.CameraActions
+import com.hr.unizg.fer.auris.camera.capturechannel.PreviewActionsChannel
+import com.hr.unizg.fer.auris.di.ACTIONS_FRAGMENT_SCOPE_ID
 import com.hr.unizg.fer.auris.navigation.FragmentRouterImpl
-import com.hr.unizg.fer.auris.navigation.Router
 import kotlinx.android.synthetic.main.fragment_actions.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.core.qualifier.named
 
+@FlowPreview
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 class ActionsFragment : Fragment() {
@@ -28,7 +35,11 @@ class ActionsFragment : Fragment() {
 
     private val router: FragmentRouterImpl by inject { parametersOf(childFragmentManager) }
 
-    private val actionsFragmentViewModel: ActionsFragmentViewModel by viewModel()
+    private val previewActionsChannel: PreviewActionsChannel by getKoin()
+        .getOrCreateScope(ACTIONS_FRAGMENT_SCOPE_ID, named<ActionsFragment>())
+        .inject()
+
+//    private val actionsFragmentViewModel: ActionsFragmentViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_actions, container, false)
@@ -40,7 +51,7 @@ class ActionsFragment : Fragment() {
         router.showViewFinderFragment()
 
         shutterButton.setOnClickListener {
-            actionsFragmentViewModel.dispatch(Router::showPreviewFragment)
+            lifecycleScope.launch { previewActionsChannel.sendAction(CameraActions::capture) }
         }
     }
 }
